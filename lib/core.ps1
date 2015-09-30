@@ -2,6 +2,8 @@ $scoopdir = $env:SCOOP, "~\appdata\local\scoop" | select -first 1
 $globaldir = $env:SCOOP_GLOBAL, "$($env:programdata.tolower())\scoop" | select -first 1
 $cachedir = "$scoopdir\cache" # always local
 
+$envjson = $env:SCOOP_ENVIRONMENT, "$scoopdir\environment.json" | select -first 1
+
 # helper functions
 function coalesce($a, $b) { if($a) { return $a } $b }
 function format($str, $hash) {
@@ -12,6 +14,24 @@ function is_admin {
     $admin = [security.principal.windowsbuiltinrole]::administrator
     $id = [security.principal.windowsidentity]::getcurrent()
     ([security.principal.windowsprincipal]($id)).isinrole($admin)
+}
+function is_portable {
+    test-path env:\SCOOP_PORTABLE
+}
+function getenv($name, $target) {
+    if (is_portable -and $target.tolower() -eq 'user') {
+        $jsonenv = gc ensure $envjson | convertfrom-json
+        $jsonenv[$name]
+    }
+    else { [environment]::getEnvironmentVariable($name,$target) }
+}
+function setenv($name, $val, $target) {
+    if (is_portable -and $target.tolower() -eq 'user') {
+        $jsonenv = gc ensure $envjson | convertfrom-json
+        $jsonenv[$name] = $val
+        $jsonenv | convertto-json | out-file $envjson
+    }
+    else { [environment]::setEnvironmentVariable($name,$val,$target) }
 }
 
 # messages
@@ -65,8 +85,8 @@ function dl($url,$to) {
 }
 function env($name,$global,$val='__get') {
     $target = 'User'; if($global) {$target = 'Machine'}
-    if($val -eq '__get') { [environment]::getEnvironmentVariable($name,$target) }
-    else { [environment]::setEnvironmentVariable($name,$val,$target) }
+    if($val -eq '__get') { getenv $name,$target }
+    else { setenv $name,$val,$target }
 }
 function unzip($path,$to) {
     if(!(test-path $path)) { abort "can't find $path to unzip"}
