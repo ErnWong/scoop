@@ -18,18 +18,27 @@ function is_admin {
 function is_portable {
     test-path env:\SCOOP_PORTABLE
 }
+function read_jsonenv {
+    $jsonenv = @{}
+    $jsonobj = gc (ensure_file $envjson) | convertfrom-json
+    $jsonobj | gm -membertype properties | % { $jsonenv.($_.name) = $jsonobj.($_.name) }
+    return $jsonenv
+}
+function write_jsonenv($jsonenv) {
+    $jsonenv | convertto-json | out-file $envjson
+}
 function getenv($name, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc (ensure_file $envjson) | convertfrom-json
+        $jsonenv = read_jsonenv
         return expand_path $jsonenv[$name]
     }
     else { [environment]::getEnvironmentVariable($name,$target) }
 }
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc (ensure_file $envjson) | convertfrom-json
+        $jsonenv = read_jsonenv
         $jsonenv[$name] = unexpand_path $val
-        $jsonenv | convertto-json | out-file $envjson
+        write_json $envjson
     }
     else { [environment]::setEnvironmentVariable($name,$val,$target) }
 }
