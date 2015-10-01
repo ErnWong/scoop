@@ -72,6 +72,13 @@ function friendly_path($path) {
     $h = $home; if(!$h.endswith('\')) { $h += '\' }
     return "$path" -replace ([regex]::escape($h)), "~\"
 }
+function unexpand_path($path) {
+    $s = $env:SCOOP.trimend('\')
+    return "$path" -replace ([regex]::escape($s)), "%SCOOP%"
+}
+function to_envpath($path) {
+    return unexpand_path (fullpath $path)
+}
 function is_local($path) {
     ($path -notmatch '^https?://') -and (test-path $path)
 }
@@ -169,7 +176,7 @@ function shim($path, $global, $name, $arg) {
 
 function ensure_in_path($dir, $global) {
     $path = env 'path' $global
-    $dir = fullpath $dir
+    $dir = to_envpath $dir
     if($path -notmatch [regex]::escape($dir)) {
         echo "adding $(friendly_path $dir) to $(if($global){'global'}else{'your'}) path"
 
@@ -184,7 +191,7 @@ function strip_path($orig_path, $dir) {
 }
 
 function remove_from_path($dir,$global) {
-    $dir = fullpath $dir
+    $dir = to_envpath $dir
 
     # future sessions
     $was_in_path, $newpath = strip_path (env 'path' $global) $dir

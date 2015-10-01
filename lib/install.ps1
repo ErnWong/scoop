@@ -544,7 +544,8 @@ function ensure_install_dir_not_in_path($dir, $global) {
 }
 
 function find_dir_or_subdir($path, $dir) {
-    $dir = $dir.trimend('\')
+    # todo: should this be to_envpath?
+    $dir = unexpand_path ($dir.trimend('\'))
     $fixed = @()
     $removed = @()
     $path.split(';') | % {
@@ -567,7 +568,7 @@ function env_add_path($manifest, $dir, $global) {
 }
 
 function add_first_in_path($dir, $global) {
-    $dir = fullpath $dir
+    $dir = to_envpath $dir
 
     # future sessions
     $null, $currpath = strip_path (env 'path' $global) $dir
@@ -591,6 +592,7 @@ function env_set($manifest, $dir, $global) {
         $manifest.env_set | gm -member noteproperty | % {
             $name = $_.name;
             $val = format $manifest.env_set.$($_.name) @{ "dir" = $dir }
+            $val = unexpand_path $val
             env $name $global $val
             sc env:\$name $val
         }
