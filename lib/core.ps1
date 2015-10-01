@@ -20,14 +20,14 @@ function is_portable {
 }
 function getenv($name, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc ensure $envjson | convertfrom-json
+        $jsonenv = gc (ensure $envjson) | convertfrom-json
         $jsonenv[$name]
     }
     else { [environment]::getEnvironmentVariable($name,$target) }
 }
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc ensure $envjson | convertfrom-json
+        $jsonenv = gc (ensure $envjson) | convertfrom-json
         $jsonenv[$name] = $val
         $jsonenv | convertto-json | out-file $envjson
     }
