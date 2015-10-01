@@ -544,8 +544,7 @@ function ensure_install_dir_not_in_path($dir, $global) {
 }
 
 function find_dir_or_subdir($path, $dir) {
-    # todo: should this be to_envpath?
-    $dir = unexpand_path ($dir.trimend('\'))
+    $dir = $dir.trimend('\')
     $fixed = @()
     $removed = @()
     $path.split(';') | % {
@@ -568,7 +567,7 @@ function env_add_path($manifest, $dir, $global) {
 }
 
 function add_first_in_path($dir, $global) {
-    $dir = to_envpath $dir
+    $dir = fullpath $dir
 
     # future sessions
     $null, $currpath = strip_path (env 'path' $global) $dir

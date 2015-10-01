@@ -21,14 +21,14 @@ function is_portable {
 function getenv($name, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = gc (ensure_file $envjson) | convertfrom-json
-        $jsonenv[$name]
+        return expand_path $jsonenv[$name]
     }
     else { [environment]::getEnvironmentVariable($name,$target) }
 }
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = gc (ensure_file $envjson) | convertfrom-json
-        $jsonenv[$name] = $val
+        $jsonenv[$name] = unexpand_path $val
         $jsonenv | convertto-json | out-file $envjson
     }
     else { [environment]::setEnvironmentVariable($name,$val,$target) }
@@ -75,10 +75,11 @@ function friendly_path($path) {
 }
 function unexpand_path($path) {
     $s = $env:SCOOP.trimend('\')
-    return "$path" -replace ([regex]::escape($s)), "%SCOOP%"
+    return "$path" -replace ([regex]::escape($s)), '%SCOOP%'
 }
-function to_envpath($path) {
-    return unexpand_path (fullpath $path)
+function expand_path($path) {
+    $s = $env:SCOOP.trimend('\')
+    return "$path" -replace ([regex]::escape('%SCOOP%')), $s
 }
 function is_local($path) {
     ($path -notmatch '^https?://') -and (test-path $path)
@@ -177,7 +178,7 @@ function shim($path, $global, $name, $arg) {
 
 function ensure_in_path($dir, $global) {
     $path = env 'path' $global
-    $dir = to_envpath $dir
+    $dir = fullpath $dir
     if($path -notmatch [regex]::escape($dir)) {
         echo "adding $(friendly_path $dir) to $(if($global){'global'}else{'your'}) path"
 
@@ -192,7 +193,7 @@ function strip_path($orig_path, $dir) {
 }
 
 function remove_from_path($dir,$global) {
-    $dir = to_envpath $dir
+    $dir = fullpath $dir
 
     # future sessions
     $was_in_path, $newpath = strip_path (env 'path' $global) $dir
