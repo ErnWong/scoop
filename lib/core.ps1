@@ -21,6 +21,7 @@ function is_portable {
 function read_jsonenv {
     $jsonenv = @{}
     $jsonobj = gc (ensure_file $envjson) | convertfrom-json
+    $jsonobj = $jsonobj, (new-object PSCustomObject) | select -first 1
     $jsonobj | gm -membertype properties | % { $jsonenv.($_.name) = $jsonobj.($_.name) }
     return $jsonenv
 }
