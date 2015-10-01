@@ -20,14 +20,14 @@ function is_portable {
 }
 function getenv($name, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc (ensure $envjson) | convertfrom-json
+        $jsonenv = gc (ensure_file $envjson) | convertfrom-json
         $jsonenv[$name]
     }
     else { [environment]::getEnvironmentVariable($name,$target) }
 }
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
-        $jsonenv = gc (ensure $envjson) | convertfrom-json
+        $jsonenv = gc (ensure_file $envjson) | convertfrom-json
         $jsonenv[$name] = $val
         $jsonenv | convertto-json | out-file $envjson
     }
@@ -64,6 +64,7 @@ function fname($path) { split-path $path -leaf }
 function strip_ext($fname) { $fname -replace '\.[^\.]*$', '' }
 
 function ensure($dir) { if(!(test-path $dir)) { mkdir $dir > $null }; resolve-path $dir }
+function ensure-file($path) { if(!(test-path $path)) { '' | out-file $path } }
 function fullpath($path) { # should be ~ rooted
     $executionContext.sessionState.path.getUnresolvedProviderPathFromPSPath($path)
 }
