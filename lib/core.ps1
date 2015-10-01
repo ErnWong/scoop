@@ -64,7 +64,7 @@ function fname($path) { split-path $path -leaf }
 function strip_ext($fname) { $fname -replace '\.[^\.]*$', '' }
 
 function ensure($dir) { if(!(test-path $dir)) { mkdir $dir > $null }; resolve-path $dir }
-function ensure-file($path) { if(!(test-path $path)) { '' | out-file $path } }
+function ensure_file($path) { if(!(test-path $path)) { '' | out-file $path } }
 function fullpath($path) { # should be ~ rooted
     $executionContext.sessionState.path.getUnresolvedProviderPathFromPSPath($path)
 }
