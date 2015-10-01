@@ -39,7 +39,7 @@ function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = read_jsonenv
         $jsonenv[$name] = unexpand_path $val
-        write_jsonenv $envjson
+        write_jsonenv $jsonenv
     }
     else { [environment]::setEnvironmentVariable($name,$val,$target) }
 }
