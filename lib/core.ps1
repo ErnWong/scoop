@@ -92,8 +92,8 @@ function dl($url,$to) {
 }
 function env($name,$global,$val='__get') {
     $target = 'User'; if($global) {$target = 'Machine'}
-    if($val -eq '__get') { getenv $name,$target }
-    else { setenv $name,$val,$target }
+    if($val -eq '__get') { getenv $name $target }
+    else { setenv $name $val $target }
 }
 function unzip($path,$to) {
     if(!(test-path $path)) { abort "can't find $path to unzip"}
