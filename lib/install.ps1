@@ -591,7 +591,6 @@ function env_set($manifest, $dir, $global) {
         $manifest.env_set | gm -member noteproperty | % {
             $name = $_.name;
             $val = format $manifest.env_set.$($_.name) @{ "dir" = $dir }
-            $val = unexpand_path $val
             env $name $global $val
             sc env:\$name $val
         }
