@@ -31,20 +31,17 @@ function write_jsonenv($jsonenv) {
 function getenv($name, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = read_jsonenv
-        if ($name -eq 'path') {
-            $userpath = [environment]::getEnvironmentVariable('path', 'user')
-            return "$($jsonenv.path);$userpath"
-        }
-        if ($jsonenv[$name]) {
-            return expand_path $jsonenv[$name]
-        }
+        return expand_path $jsonenv[$name]
     }
-    # return if not found, or if portable or if not user
-    return [environment]::getEnvironmentVariable($name,$target)
+    else { [environment]::getEnvironmentVariable($name,$target) }
 }
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = read_jsonenv
+        if ($name -eq 'path') {
+            $userpath = [environment]::getEnvironmentVariable('path', 'user')
+            $val = "$val" -replace #TODO: complete this by removing userpath from val[]
+        }
         $jsonenv[$name] = unexpand_path $val
         write_jsonenv $jsonenv
     }
