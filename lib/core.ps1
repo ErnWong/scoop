@@ -38,7 +38,7 @@ function getenv($name, $target) {
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = read_jsonenv
-        if ($val -eq '') { $jsonenv.remove($name) }
+        if ([string]::isNullOrEmpty($val)) { $jsonenv.remove($name) }
         else { $jsonenv[$name] = unexpand_path $val }
         write_jsonenv $jsonenv
     }
