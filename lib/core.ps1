@@ -38,10 +38,6 @@ function getenv($name, $target) {
 function setenv($name, $val, $target) {
     if (is_portable -and $target.tolower() -eq 'user') {
         $jsonenv = read_jsonenv
-        if ($name -eq 'path') {
-            $userpath = [environment]::getEnvironmentVariable('path', 'user')
-            $val = "$val" -replace #TODO: complete this by removing userpath from val[]
-        }
         $jsonenv[$name] = unexpand_path $val
         write_jsonenv $jsonenv
     }
