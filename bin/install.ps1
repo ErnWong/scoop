@@ -32,6 +32,14 @@ rm $zipfile
 echo 'creating shim...'
 shim "$dir\bin\scoop.ps1" $false
 
+if (test-path env:\SCOOP_PORTABLE) {
+    echo 'creating startup command...'
+    pushd $env:SCOOP
+    $relpath = resolve-path -relative "$dir\bin\startup.ps1"
+    popd
+    "@powershell -noprofile -ex unrestricted `"& '$relpath' %*;exit `$lastexitcode`"" | out-file "$env:SCOOP\start.cmd" -encoding oem
+}
+
 ensure_robocopy_in_path
 ensure_scoop_in_path
 success 'scoop was installed successfully!'
